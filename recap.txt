@@ -1,0 +1,13 @@
+1. Install Nodemon
+2. Create nodemon.json("exec": "babel-node src/server.js"), babel.config.json, server.js
+3. Install Babel (npm i @babel/core @babel/cli @babel/node @babel/preset-env -D)
+4. Create .gitignore file and add (/node_modules)
+5. Add("scripts": {
+	"dev": "nodemon"
+} to package.json
+6. Install express(npm i express), pug(npm i pug)
+7. setup server.js
+
+npm run dev(refer to 5) >>> Run localhost:3000 >>> We can find "cannot Get/"
+
++) babel의 동작 방식 -> nodemon에서 설정해둔 exec를 통해 babel-node를 실행시키면 babel-node가 babel.config.json을 찾아 코드에 적용되어야 하는 preset을 실행시킴
