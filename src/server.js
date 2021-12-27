@@ -2,6 +2,8 @@ import express from "express";
 import http from "http";
 import WebSocket from "ws";
 
+// express가 하는 일은 (1)views를 설정해주고 (2)render해주고 (3)Listen해주는 것이 전부
+// 나머지 기능은 websocket에서 실시간으로 관리
 const app = express();
 //(1)
 app.set("view engine", "pug");
@@ -16,20 +18,25 @@ const handleListen = () =>
   console.log("server opened !!\n[Listening on http://localhost:3000]");
 // app.listen(3000);
 
-// express가 하는 일은 (1)views를 설정해주고 (2)render해주고 (3)Listen해주는 것이 전부
-// 나머지 기능은 websocket에서 실시간으로 관리
-
 // 두 종류의 프로토콜을 한번에 적용 (두개가 같은 포트에)
-const server = http.createServer(app);
 // make http server
+const server = http.createServer(app);
 
-const wss = new WebSocket.Server({ server });
 // make Web Socket server on http server
+const wss = new WebSocket.Server({ server });
 
-function handleConnection(socket) {
-  console.log(socket);
-}
-
-wss.on("connection", handleConnection);
+wss.on("connection", (socket) => {
+  console.log("Connection complete with Browser 🌹");
+  //back-end(server)에서 front-end로 메시지 보내는 방법.
+  socket.send("Server is here 🙌");
+  //front-end에서 back-end(server)로 메시지를 받는 방법.
+  socket.on("message", (message) => {
+    console.log(`We got message: [${message}] from the Browser`);
+  });
+  //socket 연결이 끊어졌을때.
+  socket.on("close", () => {
+    console.log("Disconnected from the Browser");
+  });
+});
 
 server.listen(3000, handleListen);
