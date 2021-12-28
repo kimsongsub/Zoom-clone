@@ -17,21 +17,41 @@ app.get("/*", (req, res) => res.redirect("/"));
 const handleListen = () =>
   console.log("server opened !!\n[Listening on http://localhost:3000]");
 // app.listen(3000);
-
+// --------------------------------------------------------------------------------------------------------------
 // 두 종류의 프로토콜을 한번에 적용 (두개가 같은 포트에)
 // make http server
 const server = http.createServer(app);
-
 // make Web Socket server on http server
 const wss = new WebSocket.Server({ server });
 
+// 연결되는 socket들을 여기에 저장하고 저장된 모드 클라이언트(socket)에게 메시지 전송
+const socketList = [];
+
 wss.on("connection", (socket) => {
-  console.log("Connection complete with Browser 🌹");
-  //back-end(server)에서 front-end로 메시지 보내는 방법.
-  socket.send("Server is here 🙌");
-  //front-end에서 back-end(server)로 메시지를 받는 방법.
+  console.log(
+    "Connection complete with Browser 🌹\n ---------------------------"
+  );
+  socketList.push(socket);
+  socket["nickname"] = "Anonyous";
+  //front-end에서 back-end(server)로 메시지를 받아서 연결되어 있는 브라우저들에게 메시지 전달.
   socket.on("message", (message) => {
-    console.log(`We got message: [${message}] from the Browser`);
+    const jsonMessage = makeJSONMessage(message);
+    //현재 연결된(통신중인) socket(브라우저)의 nickname에 내용을 저장하고 forEach로 다른 연결돼있는 브라우저에게 메시지를 전송
+    switch (jsonMessage.type) {
+      case "nickname":
+        socket["nickname"] = jsonMessage.contents;
+        break;
+      case "new-message":
+        socketList.forEach(function (eachSocket) {
+          if (socket === eachSocket) {
+          } else {
+            eachSocket.send(
+              `${socket["nickname"]}: ${jsonMessage.contents.toString()}`
+            );
+          }
+        });
+        break;
+    }
   });
   //socket 연결이 끊어졌을때.
   socket.on("close", () => {
@@ -40,3 +60,7 @@ wss.on("connection", (socket) => {
 });
 
 server.listen(3000, handleListen);
+
+function makeJSONMessage(stringTypeJSON) {
+  return JSON.parse(stringTypeJSON);
+}
