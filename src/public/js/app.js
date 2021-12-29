@@ -1,3 +1,20 @@
+// home.pug에서 socket.io.js를 import 해주어서 밑의 함수로 back-end와 front-end가 연결 가능
+const socket = io();
+
+const welcome = document.querySelector("#welcome");
+const welcomeForm = welcome.querySelector("form");
+
+function handleRoomSubmit(event) {
+  event.preventDefault();
+  const welcomeFormInput = welcomeForm.querySelector("input");
+  socket.emit("enter_room", { contents: welcomeFormInput.value });
+  welcomeFormInput.value = "";
+}
+
+welcomeForm.addEventListener("submit", handleRoomSubmit);
+
+/* 
+------------------------------------------------------------------------------
 // const socket = new WebSocket("ws://localhost:3000");은 실행시키는 환경에 따라 로컬호스트가 다를 수 있으므로
 // 변수(객체)를 활용하여 로컬호스트를 불러옴
 const socket = new WebSocket(`ws://${window.location.host}`);
@@ -44,3 +61,5 @@ socket.addEventListener("message", (message) => {
   liMsg.innerText = message.data;
   msgList.append(liMsg);
 });
+------------------------------------------------------------------------------
+ */

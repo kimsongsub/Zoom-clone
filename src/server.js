@@ -1,6 +1,7 @@
-import express from "express";
 import http from "http";
-import WebSocket from "ws";
+import express from "express";
+// import WebSocket from "ws";
+import { Server } from "socket.io";
 
 // express가 하는 일은 (1)views를 설정해주고 (2)render해주고 (3)Listen해주는 것이 전부
 // 나머지 기능은 websocket에서 실시간으로 관리
@@ -20,10 +21,20 @@ const handleListen = () =>
 // --------------------------------------------------------------------------------------------------------------
 // 두 종류의 프로토콜을 한번에 적용 (두개가 같은 포트에)
 // make http server
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+//make socketServer from socket.io
+const socketIOServer = new Server(httpServer);
+
+socketIOServer.on("connection", (socket) => {
+  socket.on("enter_room", (sentRoomName) => {
+    console.log(sentRoomName);
+  });
+});
+
+/*
+//------------------------------------------------------------------------------------------------
 // make Web Socket server on http server
 const wss = new WebSocket.Server({ server });
-
 // 연결되는 socket들을 여기에 저장하고 저장된 모드 클라이언트(socket)에게 메시지 전송
 const socketList = [];
 
@@ -58,8 +69,10 @@ wss.on("connection", (socket) => {
     console.log("Disconnected from the Browser");
   });
 });
+//----------------------------------------------------------------------------------------
+*/
 
-server.listen(3000, handleListen);
+httpServer.listen(3000, handleListen);
 
 function makeJSONMessage(stringTypeJSON) {
   return JSON.parse(stringTypeJSON);
