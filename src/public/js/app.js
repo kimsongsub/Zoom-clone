@@ -1,13 +1,25 @@
 // home.pug에서 socket.io.js를 import 해주어서 밑의 함수로 back-end와 front-end가 연결 가능
 const socket = io();
 
-const welcome = document.querySelector("#welcome");
+const welcome = document.querySelector("#enter-room");
 const welcomeForm = welcome.querySelector("form");
+const room = document.getElementById("in-room");
+let roomName;
+
+room.hidden = true;
+
+function enterRoom() {
+  room.hidden = false;
+  welcome.hidden = true;
+  const enteredRoomName = room.querySelector("h3");
+  enteredRoomName.innerText = `Room: ${roomName}`;
+}
 
 function handleRoomSubmit(event) {
   event.preventDefault();
   const welcomeFormInput = welcomeForm.querySelector("input");
-  socket.emit("enter_room", { contents: welcomeFormInput.value });
+  roomName = welcomeFormInput.value;
+  socket.emit("enter_room", { contents: welcomeFormInput.value }, enterRoom);
   welcomeFormInput.value = "";
 }
 

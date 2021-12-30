@@ -26,8 +26,9 @@ const httpServer = http.createServer(app);
 const socketIOServer = new Server(httpServer);
 
 socketIOServer.on("connection", (socket) => {
-  socket.on("enter_room", (sentRoomName) => {
-    console.log(sentRoomName);
+  socket.on("enter_room", (sentRoomName, enterRoom) => {
+    enterRoom();
+    socket.join(sentRoomName);
   });
 });
 
