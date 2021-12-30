@@ -26,9 +26,23 @@ const httpServer = http.createServer(app);
 const socketIOServer = new Server(httpServer);
 
 socketIOServer.on("connection", (socket) => {
-  socket.on("enter_room", (sentRoomName, enterRoom) => {
-    enterRoom();
-    socket.join(sentRoomName);
+  socket.on("enter_room", (RoomName, hideRoomForm) => {
+    socket.join(RoomName);
+    hideRoomForm();
+    socket.to(RoomName).emit("welcomeMsg", socket.nicName);
+  });
+
+  socket.on("nicName", (nicName) => (socket["nicName"] = nicName));
+
+  socket.on("new_chat", (chat, roomName, selfChat) => {
+    socket.to(roomName).emit("new_chat", chat, socket.nicName);
+    selfChat();
+  });
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) => {
+      socket.to(room).emit("byeMsg", socket.nicName);
+      //여기서 disconnecting은 접속이 끊어지는 것이기 때문에 현재 모든 채팅방에서 모두 나가지는 것
+    });
   });
 });
 

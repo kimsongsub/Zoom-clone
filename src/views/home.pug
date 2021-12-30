@@ -9,16 +9,22 @@ html(lang="en")
 		link(rel="stylesheet", href="https://unpkg.com/mvp.css")
 	body 
 		header 
-			h1 Zoom
+			h1 Soom
 		main 
-			#enter-room 
-				form
+			div#out-room
+				h3 
+				form#enter-room-form
+					h3 Put your Room Name
 					input(type="text", placeholder="room name", required)
 					button Enter Room
+				form#nicname-form
+					h3 Put your Nicname
+					input(type="text", placeholder="Default: Anonymous", required)
+					h4 
+					button Save
 			div#in-room
-				h3 
 				ul
-				form
+				form#chat-form
 					input(type="text", placeholder="chat", required)
 					button Send
 		script(src="/socket.io/socket.io.js")

@@ -1,29 +1,77 @@
 // home.pug에서 socket.io.js를 import 해주어서 밑의 함수로 back-end와 front-end가 연결 가능
 const socket = io();
 
-const welcome = document.querySelector("#enter-room");
-const welcomeForm = welcome.querySelector("form");
-const room = document.getElementById("in-room");
+const welcomeForm = document.querySelector("#enter-room-form");
+const outRoom = document.getElementById("out-room");
+const inRoom = document.getElementById("in-room");
+const chatForm = inRoom.querySelector("#chat-form");
+const nicNameForm = outRoom.querySelector("#nicname-form");
 let roomName;
 
-room.hidden = true;
+inRoom.hidden = true;
 
-function enterRoom() {
-  room.hidden = false;
-  welcome.hidden = true;
-  const enteredRoomName = room.querySelector("h3");
-  enteredRoomName.innerText = `Room: ${roomName}`;
+function hideRoomForm() {
+  welcomeForm.hidden = true;
+  inRoom.hidden = false;
+  const enteredRoomName = outRoom.querySelector("h3");
+  enteredRoomName.innerText = `<Room> ${roomName}`;
+}
+
+function addMessage(message) {
+  const ul = inRoom.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
 }
 
 function handleRoomSubmit(event) {
   event.preventDefault();
+  socket.emit("nicName", "Anonymous");
   const welcomeFormInput = welcomeForm.querySelector("input");
   roomName = welcomeFormInput.value;
-  socket.emit("enter_room", { contents: welcomeFormInput.value }, enterRoom);
+  socket.emit("enter_room", roomName, hideRoomForm);
   welcomeFormInput.value = "";
 }
 
+function handleChatSubmit(event) {
+  event.preventDefault();
+  const chatInput = chatForm.querySelector("input");
+  const chat = chatInput.value;
+  socket.emit("new_chat", chatInput.value, roomName, () => {
+    addMessage(`You: ${chat}`);
+    // addMessage(`You: ${chatInput.value}`);에서 함수가 서버사이드로 보내지고 바로 밑 줄에서
+    // 빈칸으로 초기화 해버리기 때문에 서버에서 이 함수를 호출하면 아무것도 안 뜸
+  });
+  //굳이 You:~ 부분을 서버에 같이 보냈다가 프론트에서 호출하는 이유는
+  //그 앞의 내용이 서버에 잘 전달도 안 됐는데 나한테만 뜨는 것을 방지하기 위해
+  chatInput.value = "";
+}
+
+function handleNicnameSubmit(event) {
+  event.preventDefault();
+  const nicNameInput = nicNameForm.querySelector("input");
+  const nicName = nicNameInput.value;
+  socket.emit("nicName", nicName);
+  nicNameInput.value = "";
+  const savedNicname = nicNameForm.querySelector("h4");
+  savedNicname.innerText = `Current Nicname: [${nicName}]`;
+}
+
+nicNameForm.addEventListener("submit", handleNicnameSubmit);
+chatForm.addEventListener("submit", handleChatSubmit);
 welcomeForm.addEventListener("submit", handleRoomSubmit);
+
+socket.on("welcomeMsg", (nicName) => {
+  addMessage(`[${nicName}] has Joined the Room`);
+});
+
+socket.on("byeMsg", (nicName) => {
+  addMessage(`[${nicName}] has left the Room`);
+});
+
+socket.on("new_chat", (chat, nicName) => {
+  addMessage(`${nicName}: ${chat}`);
+});
 
 /* 
 ------------------------------------------------------------------------------
