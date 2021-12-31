@@ -63,13 +63,13 @@ welcomeForm.addEventListener("submit", handleRoomSubmit);
 
 socket.on("welcomeMsg", (nicName, countRoomMembers) => {
   const enteredRoomName = outRoom.querySelector("h3");
-  enteredRoomName.innerText = `<Room> ${roomName} (${countRoomMembers})`;
+  enteredRoomName.innerText = `<Room> ${roomName} (${countRoomMembers} Members)`;
   addMessage(`[${nicName}] has Joined the Room`);
 });
 
 socket.on("byeMsg", (nicName, countRoomMembers) => {
   const enteredRoomName = outRoom.querySelector("h3");
-  enteredRoomName.innerText = `<Room> ${roomName} (${countRoomMembers})`;
+  enteredRoomName.innerText = `<Room> ${roomName} (${countRoomMembers} Members)`;
   addMessage(`[${nicName}] has left the Room`);
 });
 

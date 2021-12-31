@@ -29,7 +29,7 @@ socketIOServer.on("connection", (socket) => {
   socket.on("enter_room", (RoomName, hideRoomForm) => {
     socket.join(RoomName);
     hideRoomForm();
-    socket
+    socketIOServer
       .to(RoomName)
       .emit("welcomeMsg", socket.nicName, countRoomMembers(RoomName));
     socketIOServer.sockets.emit("room_change", findPublicRooms());
