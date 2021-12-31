@@ -29,7 +29,6 @@ socketIOServer.on("connection", (socket) => {
   socket.on("enter_room", (RoomName, hideRoomForm) => {
     socket.join(RoomName);
     hideRoomForm();
-    socket.to(RoomName).emit("welcomeMsg", socket.nicName);
     socket
       .to(RoomName)
       .emit("welcomeMsg", socket.nicName, countRoomMembers(RoomName));
@@ -44,14 +43,33 @@ socketIOServer.on("connection", (socket) => {
   });
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) => {
-      socket.to(room).emit("byeMsg", socket.nicName);
       //여기서 disconnecting은 접속이 끊어지는 것이기 때문에 현재 모든 채팅방에서 모두 나가지는 것
       socket
         .to(room)
         .emit("byeMsg", socket.nicName, countRoomMembers(room) - 1);
     });
   });
+
+  socket.on("disconnect", () => {
+    socketIOServer.sockets.emit("room_change", findPublicRooms());
+  });
 });
+
+httpServer.listen(3000, handleListen);
+
+function findPublicRooms() {
+  const sids = socketIOServer.sockets.adapter.sids;
+  const rooms = socketIOServer.sockets.adapter.rooms;
+  const publicRooms = [];
+
+  // forEach문을 통해 value가 아닌 key(index)를 탐색
+  rooms.forEach(function (_, key) {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+  return publicRooms;
+}
 
 function countRoomMembers(roomName) {
   const numberOfRoomMembers =
@@ -65,6 +83,10 @@ function countRoomMembers(roomName) {
 const wss = new WebSocket.Server({ server });
 // 연결되는 socket들을 여기에 저장하고 저장된 모드 클라이언트(socket)에게 메시지 전송
 const socketList = [];
+
+function makeJSONMessage(stringTypeJSON) {
+  return JSON.parse(stringTypeJSON);
+}
 
 wss.on("connection", (socket) => {
   console.log(
@@ -99,9 +121,3 @@ wss.on("connection", (socket) => {
 });
 //----------------------------------------------------------------------------------------
 */
-
-httpServer.listen(3000, handleListen);
-
-function makeJSONMessage(stringTypeJSON) {
-  return JSON.parse(stringTypeJSON);
-}

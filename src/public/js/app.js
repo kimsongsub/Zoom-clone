@@ -77,6 +77,11 @@ socket.on("new_chat", (chat, nicName) => {
   addMessage(`${nicName}: ${chat}`);
 });
 
+socket.on("room_change", (findPublicRooms) => {
+  const avaliableRoom = welcomeForm.querySelector("h4");
+  const avaliableRoomLi = avaliableRoom.querySelector("li");
+  avaliableRoomLi.innerText = findPublicRooms;
+});
 /* 
 ------------------------------------------------------------------------------
 // const socket = new WebSocket("ws://localhost:3000");은 실행시키는 환경에 따라 로컬호스트가 다를 수 있으므로
