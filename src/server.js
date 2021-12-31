@@ -30,6 +30,10 @@ socketIOServer.on("connection", (socket) => {
     socket.join(RoomName);
     hideRoomForm();
     socket.to(RoomName).emit("welcomeMsg", socket.nicName);
+    socket
+      .to(RoomName)
+      .emit("welcomeMsg", socket.nicName, countRoomMembers(RoomName));
+    socketIOServer.sockets.emit("room_change", findPublicRooms());
   });
 
   socket.on("nicName", (nicName) => (socket["nicName"] = nicName));
@@ -42,10 +46,19 @@ socketIOServer.on("connection", (socket) => {
     socket.rooms.forEach((room) => {
       socket.to(room).emit("byeMsg", socket.nicName);
       //여기서 disconnecting은 접속이 끊어지는 것이기 때문에 현재 모든 채팅방에서 모두 나가지는 것
+      socket
+        .to(room)
+        .emit("byeMsg", socket.nicName, countRoomMembers(room) - 1);
     });
   });
 });
 
+function countRoomMembers(roomName) {
+  const numberOfRoomMembers =
+    socketIOServer.sockets.adapter.rooms.get(roomName)?.size;
+
+  return numberOfRoomMembers;
+}
 /*
 //------------------------------------------------------------------------------------------------
 // make Web Socket server on http server

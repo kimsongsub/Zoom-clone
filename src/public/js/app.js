@@ -61,11 +61,15 @@ nicNameForm.addEventListener("submit", handleNicnameSubmit);
 chatForm.addEventListener("submit", handleChatSubmit);
 welcomeForm.addEventListener("submit", handleRoomSubmit);
 
-socket.on("welcomeMsg", (nicName) => {
+socket.on("welcomeMsg", (nicName, countRoomMembers) => {
+  const enteredRoomName = outRoom.querySelector("h3");
+  enteredRoomName.innerText = `<Room> ${roomName} (${countRoomMembers})`;
   addMessage(`[${nicName}] has Joined the Room`);
 });
 
-socket.on("byeMsg", (nicName) => {
+socket.on("byeMsg", (nicName, countRoomMembers) => {
+  const enteredRoomName = outRoom.querySelector("h3");
+  enteredRoomName.innerText = `<Room> ${roomName} (${countRoomMembers})`;
   addMessage(`[${nicName}] has left the Room`);
 });
 
